@@ -14,8 +14,9 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 	private final static String FILE_NAME = "threat-detection";
 	 private File baseDir;
 	  private RocksDB db;
+	  private static RocksRepository rocksRepository;
 	  
-	RocksRepository(){
+	private RocksRepository(){
 		RocksDB.loadLibrary();
 	    final Options options = new Options();
 	    options.setCreateIfMissing(true);
@@ -29,6 +30,14 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 	      } catch(IOException | RocksDBException e) {
 	        System.out.println("Error initializng RocksDB. Exception: '{}', message: '{}'");
 	      }
+	}
+	
+	public static RocksRepository getRocksRepository() {
+		if(rocksRepository==null) {
+			rocksRepository = new RocksRepository();
+		}
+		
+		return rocksRepository;
 	}
 
 	@Override
