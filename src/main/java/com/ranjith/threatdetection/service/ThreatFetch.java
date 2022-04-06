@@ -2,6 +2,7 @@ package com.ranjith.threatdetection.service;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -87,7 +88,6 @@ public class ThreatFetch {
 			pollRequest.setPollParameters(pollParameter);
 			
 			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()), pollRequest);
-			
 			if(responseObject instanceof PollResponse) {
 				for(ContentBlock contentBlock : ((PollResponse) responseObject).getContentBlocks()) {
 					String contentBlockString = taxiiXml.marshalToString(contentBlock,false);
@@ -104,8 +104,18 @@ public class ThreatFetch {
 									if(observable.getObject()!=null) {
 										
 										URIObjectType type =  (URIObjectType) stixPackage.getObservables().getObservables().get(0).getObject().getProperties();
-										String threatUrl = type.getValue().getValue().toString();
-										rocksRepository.save(threatUrl, observable.toXMLString());
+										String threatUrl = type.getValue().getValue().toString().trim();
+										if(threatUrl.indexOf("https://")!=-1) {
+											threatUrl = threatUrl.substring("https://".length());
+										}else {
+											threatUrl = threatUrl.substring("http://".length());
+										}
+										if(threatUrl.indexOf("/")!=-1) {
+											threatUrl = threatUrl.substring(0,threatUrl.indexOf("/"));
+										}
+										
+										String threatIp = InetAddress.getByName(threatUrl).getHostAddress();
+										rocksRepository.save(threatIp, observable.toXMLString());
 										
 									}
 								}
@@ -138,7 +148,7 @@ public class ThreatFetch {
 					}
 				}
 			}else if(responseObject instanceof StatusMessage) {
-				
+				System.out.println(responseObject);
 			}
                     
 		} catch (DatatypeConfigurationException e) {

@@ -30,6 +30,7 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 	      } catch(IOException | RocksDBException e) {
 	        System.out.println("Error initializng RocksDB. Exception: '{}', message: '{}'");
 	      }
+	 
 	}
 	
 	public static RocksRepository getRocksRepository() {
