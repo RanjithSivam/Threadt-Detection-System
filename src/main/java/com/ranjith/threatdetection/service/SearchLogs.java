@@ -12,8 +12,12 @@ import java.nio.file.WatchService;
 import java.util.Scanner;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchLogs {
+	
+	Logger log = LoggerFactory.getLogger(SearchLogs.class);
 	
 	private FileSystem fs;
 	private WatchService ws;
@@ -27,7 +31,7 @@ public class SearchLogs {
 		ws = fs.newWatchService();
 		directory = fs.getPath(LOG_PATH).toAbsolutePath();
 		maliciousThreat = MaliciousThreat.getMaliciousThreat();
-		System.out.println("Logs search started.....");
+		log.info("Monitoring firewall logs....");
 	}
 	
 	public void watchForThreats() {
@@ -48,12 +52,11 @@ public class SearchLogs {
 		                		if(lastReadLine!=null && lastReadLine.equals(currentLog)) {
 			                		break;
 			                	}
-//		                		System.out.println(currentLog);
 			                	String timeString = currentLog.substring(0,currentLog.indexOf(System.getProperty("user.name")));
 			                	String source = currentLog.substring(currentLog.indexOf("SRC=")+4,currentLog.indexOf("DST")).trim();
 			                	String destination = currentLog.substring(currentLog.indexOf("DST=")+4,currentLog.indexOf("LEN")).trim();
 			                	if(maliciousThreat.isMalicious(source) || maliciousThreat.isMalicious(destination)) {
-			                		System.out.println("malicious");
+			                		log.warn("The followinf connection is malicious. source:{}, destination:{}, time:{}",source,destination,timeString);
 			                	}
 			                	if(first) {
 			                		currentLastReadLine = currentLog;
@@ -68,7 +71,7 @@ public class SearchLogs {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 	

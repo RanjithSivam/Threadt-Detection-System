@@ -8,8 +8,16 @@ import java.util.Optional;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ranjith.threatdetection.service.ThreatFetch;
+
+
 
 public class RocksRepository implements RocksRepositoryInterface<String, String> {
+	
+	Logger log = LoggerFactory.getLogger(RocksRepository.class);
 	
 	private final static String FILE_NAME = "threat-detection";
 	 private File baseDir;
@@ -26,9 +34,10 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 	        Files.createDirectories(baseDir.getParentFile().toPath());
 	        Files.createDirectories(baseDir.getAbsoluteFile().toPath());
 	        db = RocksDB.open(options, baseDir.getAbsolutePath());
-	        System.out.println("RocksDB initialized");
+	        
+	        log.info("RocksDB initialized");
 	      } catch(IOException | RocksDBException e) {
-	        System.out.println("Error initializng RocksDB."+e.getMessage());
+	    	  log.error("Error initializng RocksDB. Exception: '{}', message: '{}'", e.getCause(), e.getMessage(), e);
 	      }
 	 
 	}
@@ -46,7 +55,7 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 		try {
 		      db.put(key.getBytes(), value.getBytes());
 		}catch(RocksDBException e) {
-			System.out.println("Error saving entry.");
+			log.error("Error saving entry. Cause: '{}', message: '{}'", e.getCause(), e.getMessage());
 			return false;
 		}
 		return true;
@@ -60,9 +69,12 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 		      byte[] bytes = db.get(key.getBytes());
 		      if (bytes != null) value = new String(bytes);
 		    } catch (RocksDBException e) {
-		      System.out.println(
-		        "Error retrieving the entry with key: {}, cause: {}, message: {}"
-		      );
+		    	log.error(
+		    	        "Error retrieving the entry with key: {}, cause: {}, message: {}", 
+		    	        key, 
+		    	        e.getCause(), 
+		    	        e.getMessage()
+		    	      );
 		    }
 		return Optional.ofNullable(value);
 	}
@@ -72,7 +84,7 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 		try {
 		      db.delete(key.getBytes());
 		    } catch (RocksDBException e) {
-		      System.out.println("Error deleting entry, cause: '{}', message: '{}'");
+		    	log.error("Error deleting entry, cause: '{}', message: '{}'", e.getCause(), e.getMessage());
 		      return false;
 		    }
 		    return true;
