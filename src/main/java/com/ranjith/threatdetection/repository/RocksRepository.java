@@ -28,7 +28,7 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 	        db = RocksDB.open(options, baseDir.getAbsolutePath());
 	        System.out.println("RocksDB initialized");
 	      } catch(IOException | RocksDBException e) {
-	        System.out.println("Error initializng RocksDB. Exception: '{}', message: '{}'");
+	        System.out.println("Error initializng RocksDB."+e.getMessage());
 	      }
 	 
 	}

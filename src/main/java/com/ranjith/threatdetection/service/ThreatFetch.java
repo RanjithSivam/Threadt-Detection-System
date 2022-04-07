@@ -41,7 +41,8 @@ import org.mitre.taxii.messages.xml11.TaxiiXmlFactory;
 import com.ranjith.threatdetection.model.Source;
 import com.ranjith.threatdetection.repository.RocksRepository;
 
-public class ThreatFetch {
+public class ThreatFetch extends Thread{
+	
 	
 	private ObjectFactory factory = new ObjectFactory();
 	private TaxiiXmlFactory txf = new TaxiiXmlFactory();
@@ -49,10 +50,12 @@ public class ThreatFetch {
     private HttpClient taxiiClient;
     private Source source;
     private RocksRepository rocksRepository;
+    private final int ONE_DAY = 86400000;
     
     public ThreatFetch(Source source){
     	this.source = source;
     	initialize();
+    	System.out.println(Thread.activeCount()+" "+"started.....");
     }
     
     private void initialize() {
@@ -69,7 +72,7 @@ public class ThreatFetch {
     
     private GregorianCalendar[] getBeginEnd() {
     	GregorianCalendar begin = new GregorianCalendar();
-    	begin.setTime(new Date(new Date().getTime()- 1000 * 60 * 60 * 24));
+    	begin.setTime(new Date(new Date().getTime()- ONE_DAY));
         GregorianCalendar end = new GregorianCalendar();
         end.setTime(new Date());
         
@@ -89,10 +92,13 @@ public class ThreatFetch {
 			
 			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()), pollRequest);
 			if(responseObject instanceof PollResponse) {
+				
+				System.out.println(taxiiXml.marshalToString(responseObject,false));
+				
 				for(ContentBlock contentBlock : ((PollResponse) responseObject).getContentBlocks()) {
 					String contentBlockString = taxiiXml.marshalToString(contentBlock,false);
 					STIXPackage stixPackage = STIXPackage.fromXMLString(contentBlockString.substring(contentBlockString.indexOf("<stix:STIX_Package"), contentBlockString.lastIndexOf("</stix:STIX_Package>"))+"</stix:STIX_Package>");
-
+					
 					if(stixPackage.getObservables()!=null) {
 						
 						if(stixPackage.getObservables().getObservables()!=null) {
@@ -105,6 +111,7 @@ public class ThreatFetch {
 										
 										URIObjectType type =  (URIObjectType) stixPackage.getObservables().getObservables().get(0).getObject().getProperties();
 										String threatUrl = type.getValue().getValue().toString().trim();
+										System.out.println(threatUrl);
 										if(threatUrl.indexOf("https://")!=-1) {
 											threatUrl = threatUrl.substring("https://".length());
 										}else {
@@ -181,5 +188,16 @@ public class ThreatFetch {
     
     public void collectionManagement() {
     	
+    }
+    
+    public void run() {
+    	while(true) {
+    		pollRequest();
+    		try {
+				Thread.sleep(ONE_DAY);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    	}
     }
 }
