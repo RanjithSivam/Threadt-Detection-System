@@ -20,29 +20,27 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 	  private RocksDB db;
 	  private static RocksRepository rocksRepository;
 	  
-	private RocksRepository(){
+	private RocksRepository() throws IOException, RocksDBException{
 		RocksDB.loadLibrary();
 	    final Options options = new Options();
 	    options.setCreateIfMissing(true);
 	    baseDir = new File("/tmp/rocks", FILE_NAME);
+	    Files.createDirectories(baseDir.getParentFile().toPath());
+        Files.createDirectories(baseDir.getAbsoluteFile().toPath());
+        db = RocksDB.open(options, baseDir.getAbsolutePath());
+        
+        log.config("RocksDB initialized");
 	    
-	    try {
-	        Files.createDirectories(baseDir.getParentFile().toPath());
-	        Files.createDirectories(baseDir.getAbsoluteFile().toPath());
-	        db = RocksDB.open(options, baseDir.getAbsolutePath());
-	        
-	        log.config("RocksDB initialized");
-	      } catch(IOException | RocksDBException e) {
-	    	  log.severe("Error initializng RocksDB. Exception:" + e.getCause() +", message: "+ e.getMessage());
-	      }
-	 
+    	Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				db.close();
+			}
+    	}));
 	}
 	
-	public void close() {
-		db.close();
-	}
 	
-	public static RocksRepository getRocksRepository() {
+	public static RocksRepository getRocksRepository() throws IOException, RocksDBException {
 		if(rocksRepository==null) {
 			rocksRepository = new RocksRepository();
 		}

@@ -1,6 +1,9 @@
 package com.ranjith.threatdetection.service;
 
+import java.io.IOException;
 import java.util.Optional;
+
+import org.rocksdb.RocksDBException;
 
 import com.ranjith.threatdetection.repository.RocksRepository;
 
@@ -10,7 +13,12 @@ public class MaliciousThreat {
 	public static MaliciousThreat maliciousThreat;
 	
 	private MaliciousThreat(){
-		rocksRepository = RocksRepository.getRocksRepository();
+		try {
+			rocksRepository = RocksRepository.getRocksRepository();
+		} catch (IOException | RocksDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static MaliciousThreat getMaliciousThreat() {

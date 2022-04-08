@@ -30,6 +30,7 @@ import org.mitre.stix.stix_1.STIXPackage;
 import org.mitre.taxii.client.HttpClient;
 import org.mitre.taxii.messages.xml11.ContentBlock;
 import org.mitre.taxii.messages.xml11.DiscoveryRequest;
+import org.mitre.taxii.messages.xml11.DiscoveryResponse;
 import org.mitre.taxii.messages.xml11.MessageHelper;
 import org.mitre.taxii.messages.xml11.ObjectFactory;
 import org.mitre.taxii.messages.xml11.PollParametersType;
@@ -39,6 +40,7 @@ import org.mitre.taxii.messages.xml11.ResponseTypeEnum;
 import org.mitre.taxii.messages.xml11.StatusMessage;
 import org.mitre.taxii.messages.xml11.TaxiiXml;
 import org.mitre.taxii.messages.xml11.TaxiiXmlFactory;
+import org.rocksdb.RocksDBException;
 
 import com.ranjith.threatdetection.model.Source;
 import com.ranjith.threatdetection.repository.RocksRepository;
@@ -60,6 +62,7 @@ public class ThreatFetch extends Thread{
     	this.source = source;
     	initialize();
     	log.config(Thread.activeCount()+ " thread started....");
+//    	System.out.println(Thread.activeCount()+"staerted...");
     }
     
     private void initialize() {
@@ -71,7 +74,12 @@ public class ThreatFetch extends Thread{
         cb.setDefaultCredentialsProvider(credsProvider);        
         CloseableHttpClient httpClient = cb.build();
         taxiiClient = new HttpClient(httpClient);
-        rocksRepository = RocksRepository.getRocksRepository();
+        try {
+			rocksRepository = RocksRepository.getRocksRepository();
+		} catch (IOException | RocksDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
     }
     
@@ -95,7 +103,7 @@ public class ThreatFetch extends Thread{
 			pollParameter.setResponseType(ResponseTypeEnum.FULL);
 			pollRequest.setPollParameters(pollParameter);
 			
-			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()), pollRequest);
+			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()+"/poll"), pollRequest);
 			if(responseObject instanceof PollResponse) {
 				
 //				log.info(taxiiXml.marshalToString(responseObject,false));
@@ -117,6 +125,7 @@ public class ThreatFetch extends Thread{
 										if(stixPackage.getObservables().getObservables().get(0).getObject().getProperties() instanceof URIObjectType) {
 											URIObjectType type =  (URIObjectType) stixPackage.getObservables().getObservables().get(0).getObject().getProperties();
 											String threatUrl = type.getValue().getValue().toString().trim();
+//											System.out.println(threatUrl);
 											if(threatUrl.indexOf("https://")!=-1) {
 												threatUrl = threatUrl.substring("https://".length());
 											}else {
@@ -130,7 +139,7 @@ public class ThreatFetch extends Thread{
 												String threatIp = InetAddress.getByName(threatUrl).getHostAddress();
 												rocksRepository.save(threatIp, observable.toXMLString());
 											}catch(UnknownHostException e) {
-												log.info("Can't get host addresss because "+e.getMessage());
+//												log.info("Can't get host addresss because "+e.getMessage());
 											}
 										}
 										
@@ -155,10 +164,12 @@ public class ThreatFetch extends Thread{
 										
 										if(type instanceof Address) {
 											String threatUrl = ((Address) type).getAddressValue().getValue().toString();
+//											System.out.println(threatUrl);
 											rocksRepository.save(threatUrl, indicator.toXMLString());
 											
 										}else if(type instanceof URIObjectType){
 											String threatUrl = ((URIObjectType)type).getValue().getValue().toString().trim();
+											System.out.println(threatUrl);
 											if(threatUrl.indexOf("https://")!=-1) {
 												threatUrl = threatUrl.substring("https://".length());
 											}else {
@@ -172,7 +183,7 @@ public class ThreatFetch extends Thread{
 												String threatIp = InetAddress.getByName(threatUrl).getHostAddress();
 												rocksRepository.save(threatIp, indicator.toXMLString());
 											}catch(UnknownHostException e) {
-												log.info("Can't get host addresss because "+e.getMessage());
+//												log.info("Can't get host addresss because "+e.getMessage());
 											}
 										}
 									}
@@ -198,13 +209,20 @@ public class ThreatFetch extends Thread{
 		}
     }
     
-    public void discover() {
+    public boolean discover() {
     	DiscoveryRequest dicoveryRequest = factory.createDiscoveryRequest().withMessageId(MessageHelper.generateMessageId());
     	try {
 			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()), dicoveryRequest);
+			
+			if(responseObject instanceof DiscoveryResponse) {
+				DiscoveryResponse dr = (DiscoveryResponse) responseObject;
+//				System.out.println(taxiiXml.marshalToString(dr, true));
+			}
 		} catch (JAXBException | IOException | URISyntaxException e) {
 			log.severe(e.getMessage());
 		}
+    	
+    	return false;
     }
     
     public void collectionManagement() {
@@ -214,7 +232,12 @@ public class ThreatFetch extends Thread{
     @Override
     public void run() {
     	while(true) {
-    		pollRequest();
+    		if(discover()) {
+    			pollRequest();
+    		}else {
+    			break;
+    		}
+    		
     		try {
 				Thread.sleep(ONE_DAY);
 			} catch (InterruptedException e) {

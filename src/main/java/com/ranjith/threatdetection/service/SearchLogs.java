@@ -17,24 +17,25 @@ import org.apache.commons.io.input.ReversedLinesFileReader;
 
 public class SearchLogs extends Thread{
 	
-	Logger fileLog = Logger.getLogger(ThreatFetch.class.getName());
+	Logger fileLog = Logger.getLogger(SearchLogs.class.getName());
 	Logger log = Logger.getLogger(SearchLogs.class.getName());
 	
 	private FileSystem fs;
 	private WatchService ws;
 	private Path directory;
-	private final String LOG_PATH = "/var/log";
+	private final String FIREWALL_LOG_PATH = "/var/log";
+	private final String THREAT_LOG = "/home/ranjith/Desktop/threat.log";
 	private MaliciousThreat maliciousThreat;
 	private String lastReadLine;
 	
 	public SearchLogs() throws IOException{
 		fs  = FileSystems.getDefault();
 		ws = fs.newWatchService();
-		directory = fs.getPath(LOG_PATH).toAbsolutePath();
+		directory = fs.getPath(FIREWALL_LOG_PATH).toAbsolutePath();
 		maliciousThreat = MaliciousThreat.getMaliciousThreat();
 		log.config("Monitoring firewall logs....");
 		try {
-			FileHandler fileHandler = new FileHandler("/home/ranjith/Desktop/threat.log", true);
+			FileHandler fileHandler = new FileHandler(THREAT_LOG, true);
 			fileLog.addHandler(fileHandler);
 		} catch (SecurityException | IOException e) {
 			log.severe(e.getMessage());
@@ -49,14 +50,13 @@ public class SearchLogs extends Thread{
 				for(WatchEvent<?> event : watchKey.pollEvents()) {
 		            final Path changed = (Path) event.context();
 		            if (changed.endsWith("ufw.log")) {
-		                ReversedLinesFileReader fileReader = new ReversedLinesFileReader(new File(LOG_PATH+"/ufw.log"));
-		                String currentLog;
-		                String currentLastReadLine = null;
-		                boolean first = true;
-		                do {
-		                	currentLog = fileReader.readLine();
-		                	if(currentLog!=null) {
-		                		if(lastReadLine!=null && lastReadLine.equals(currentLog)) {
+		                try(ReversedLinesFileReader fileReader = new ReversedLinesFileReader(new File(FIREWALL_LOG_PATH+"/ufw.log"))) {
+			                String currentLog;
+			                String currentLastReadLine = null;
+			                boolean first = true;
+			                
+			                while((currentLog = fileReader.readLine())!=null) {
+			                	if(lastReadLine!=null && lastReadLine.equals(currentLog)) {
 			                		break;
 			                	}
 			                	String timeString = currentLog.substring(0,currentLog.indexOf(System.getProperty("user.name")));
@@ -71,11 +71,10 @@ public class SearchLogs extends Thread{
 			                		currentLastReadLine = currentLog;
 			                		first = false;
 			                	}
-		                	}
-		                }while(currentLog!=null);
-		                
-		                lastReadLine = currentLastReadLine;
-		                fileReader.close();
+			                }
+			                
+			                lastReadLine = currentLastReadLine;
+		                }
 		            }
 				}
 			}
