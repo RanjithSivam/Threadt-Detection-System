@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -38,15 +39,13 @@ import org.mitre.taxii.messages.xml11.ResponseTypeEnum;
 import org.mitre.taxii.messages.xml11.StatusMessage;
 import org.mitre.taxii.messages.xml11.TaxiiXml;
 import org.mitre.taxii.messages.xml11.TaxiiXmlFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ranjith.threatdetection.model.Source;
 import com.ranjith.threatdetection.repository.RocksRepository;
 
 public class ThreatFetch extends Thread{
 	
-	Logger log = LoggerFactory.getLogger(ThreatFetch.class);
+	Logger log = Logger.getLogger(ThreatFetch.class.getName());
 	
 	private ObjectFactory factory = new ObjectFactory();
 	private TaxiiXmlFactory txf = new TaxiiXmlFactory();
@@ -60,7 +59,7 @@ public class ThreatFetch extends Thread{
     public ThreatFetch(Source source){
     	this.source = source;
     	initialize();
-    	log.info("{} thread started....",Thread.activeCount());
+    	log.config(Thread.activeCount()+ " thread started....");
     }
     
     private void initialize() {
@@ -73,6 +72,7 @@ public class ThreatFetch extends Thread{
         CloseableHttpClient httpClient = cb.build();
         taxiiClient = new HttpClient(httpClient);
         rocksRepository = RocksRepository.getRocksRepository();
+        
     }
     
     private GregorianCalendar[] getBeginEnd() {
@@ -130,7 +130,7 @@ public class ThreatFetch extends Thread{
 												String threatIp = InetAddress.getByName(threatUrl).getHostAddress();
 												rocksRepository.save(threatIp, observable.toXMLString());
 											}catch(UnknownHostException e) {
-												log.error("Can't get host addresss because {}",e.getMessage());
+												log.info("Can't get host addresss because "+e.getMessage());
 											}
 										}
 										
@@ -172,7 +172,7 @@ public class ThreatFetch extends Thread{
 												String threatIp = InetAddress.getByName(threatUrl).getHostAddress();
 												rocksRepository.save(threatIp, indicator.toXMLString());
 											}catch(UnknownHostException e) {
-												log.error("Can't get host addresss because {}",e.getMessage());
+												log.info("Can't get host addresss because "+e.getMessage());
 											}
 										}
 									}
@@ -182,19 +182,19 @@ public class ThreatFetch extends Thread{
 					}
 				}
 			}else if(responseObject instanceof StatusMessage) {
-				log.warn("No Poll response was found. {}",taxiiXml.marshalToString(responseObject, true));
+				log.info("No Poll response was found." + taxiiXml.marshalToString(responseObject, true));
 			}
                     
 		} catch (DatatypeConfigurationException e) {
-			log.error(e.getMessage());
+			log.severe(e.getMessage());
 		} catch (UnsupportedEncodingException e) {
-			log.error(e.getMessage());
+			log.severe(e.getMessage());
 		} catch (JAXBException e) {
-			log.error(e.getMessage());
+			log.severe(e.getMessage());
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			log.severe(e.getMessage());
 		} catch (URISyntaxException e) {
-			log.error(e.getMessage());
+			log.severe(e.getMessage());
 		}
     }
     
@@ -203,7 +203,7 @@ public class ThreatFetch extends Thread{
     	try {
 			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()), dicoveryRequest);
 		} catch (JAXBException | IOException | URISyntaxException e) {
-			log.error(e.getMessage());
+			log.severe(e.getMessage());
 		}
     }
     
@@ -211,13 +211,14 @@ public class ThreatFetch extends Thread{
     	
     }
     
+    @Override
     public void run() {
     	while(true) {
     		pollRequest();
     		try {
 				Thread.sleep(ONE_DAY);
 			} catch (InterruptedException e) {
-				log.error(e.getMessage());
+				log.severe(e.getMessage());
 			}
     	}
     }

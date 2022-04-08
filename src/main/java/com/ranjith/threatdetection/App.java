@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.ranjith.threatdetection.model.Source;
 import com.ranjith.threatdetection.model.Sources;
+import com.ranjith.threatdetection.repository.RocksRepository;
 import com.ranjith.threatdetection.service.SearchLogs;
 import com.ranjith.threatdetection.service.ThreatFetch;
 
@@ -22,6 +23,14 @@ public class App
     	}
     	
     	SearchLogs searchLogs = new SearchLogs();
-    	searchLogs.watchForThreats();
+    	searchLogs.start();
+    	
+    	Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				RocksRepository.getRocksRepository().close();
+			}
+
+    	}));
     }
 }

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+</log>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2022-04-08T07:30:06.922661334Z</date>
+  <millis>1649403006922</millis>
+  <nanos>661334</nanos>
+  <sequence>0</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>WARNING</level>
+  <class>com.ranjith.threatdetection.service.SearchLogs</class>
+  <method>watchForThreats</method>
+  <thread>1</thread>
+  <message>The following connection is malicious. source: 192.168.225.130, destination:193.106.191.162, time: Apr  7 11:19:10 , info: &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;indicator:Indicator xmlns:indicator="http://stix.mitre.org/Indicator-2" id="alienvault-otx:indicator-f05212ce-2d85-b926-86bb-2d7a95676de3" timestamp="2022-04-06T13:29:49" xmlns="http://xml/metadataSharing.xsd" xmlns:AddressObj="http://cybox.mitre.org/objects#AddressObject-2" xmlns:alienvault-otx="https://otx.alienvault.com" xmlns:cybox="http://cybox.mitre.org/cybox-2"&gt;&lt;indicator:Title&gt;193.106.191.162 from https://otx.alienvault.com/pulse/624d95cc150a3b213dd765e1&lt;/indicator:Title&gt;&lt;indicator:Description&gt;CC=RU ASN=AS59940 Kanzas LLC&lt;/indicator:Description&gt;&lt;indicator:Observable id="alienvault-otx:Observable-f05212ce-2d85-b926-86bb-2d7a95676de3"&gt;&lt;cybox:Title&gt;IPv4 - 193.106.191.162&lt;/cybox:Title&gt;&lt;cybox:Object id="alienvault-otx:Address-a16b1be4-2781-4fb8-b860-207e7a1c36be"&gt;&lt;cybox:Properties category="ipv4-addr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AddressObj:AddressObjectType"&gt;&lt;AddressObj:Address_Value&gt;193.106.191.162&lt;/AddressObj:Address_Value&gt;&lt;/cybox:Properties&gt;&lt;/cybox:Object&gt;&lt;/indicator:Observable&gt;&lt;/indicator:Indicator&gt;</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:07.019859816Z</date>
+  <millis>1649403007019</millis>
+  <nanos>859816</nanos>
+  <sequence>1</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>WARNING</level>
+  <class>com.ranjith.threatdetection.service.SearchLogs</class>
+  <method>watchForThreats</method>
+  <thread>1</thread>
+  <message>The following connection is malicious. source: 192.168.225.130, destination:193.106.191.162, time: Apr  7 11:19:10 , info: &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;indicator:Indicator xmlns:indicator="http://stix.mitre.org/Indicator-2" id="alienvault-otx:indicator-f05212ce-2d85-b926-86bb-2d7a95676de3" timestamp="2022-04-06T13:29:49" xmlns="http://xml/metadataSharing.xsd" xmlns:AddressObj="http://cybox.mitre.org/objects#AddressObject-2" xmlns:alienvault-otx="https://otx.alienvault.com" xmlns:cybox="http://cybox.mitre.org/cybox-2"&gt;&lt;indicator:Title&gt;193.106.191.162 from https://otx.alienvault.com/pulse/624d95cc150a3b213dd765e1&lt;/indicator:Title&gt;&lt;indicator:Description&gt;CC=RU ASN=AS59940 Kanzas LLC&lt;/indicator:Description&gt;&lt;indicator:Observable id="alienvault-otx:Observable-f05212ce-2d85-b926-86bb-2d7a95676de3"&gt;&lt;cybox:Title&gt;IPv4 - 193.106.191.162&lt;/cybox:Title&gt;&lt;cybox:Object id="alienvault-otx:Address-a16b1be4-2781-4fb8-b860-207e7a1c36be"&gt;&lt;cybox:Properties category="ipv4-addr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AddressObj:AddressObjectType"&gt;&lt;AddressObj:Address_Value&gt;193.106.191.162&lt;/AddressObj:Address_Value&gt;&lt;/cybox:Properties&gt;&lt;/cybox:Object&gt;&lt;/indicator:Observable&gt;&lt;/indicator:Indicator&gt;</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:07.022203525Z</date>
+  <millis>1649403007022</millis>
+  <nanos>203525</nanos>
+  <sequence>2</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>WARNING</level>
+  <class>com.ranjith.threatdetection.service.SearchLogs</class>
+  <method>watchForThreats</method>
+  <thread>1</thread>
+  <message>The following connection is malicious. source: 192.168.225.130, destination:193.106.191.162, time: Apr  7 11:18:33 , info: &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;indicator:Indicator xmlns:indicator="http://stix.mitre.org/Indicator-2" id="alienvault-otx:indicator-f05212ce-2d85-b926-86bb-2d7a95676de3" timestamp="2022-04-06T13:29:49" xmlns="http://xml/metadataSharing.xsd" xmlns:AddressObj="http://cybox.mitre.org/objects#AddressObject-2" xmlns:alienvault-otx="https://otx.alienvault.com" xmlns:cybox="http://cybox.mitre.org/cybox-2"&gt;&lt;indicator:Title&gt;193.106.191.162 from https://otx.alienvault.com/pulse/624d95cc150a3b213dd765e1&lt;/indicator:Title&gt;&lt;indicator:Description&gt;CC=RU ASN=AS59940 Kanzas LLC&lt;/indicator:Description&gt;&lt;indicator:Observable id="alienvault-otx:Observable-f05212ce-2d85-b926-86bb-2d7a95676de3"&gt;&lt;cybox:Title&gt;IPv4 - 193.106.191.162&lt;/cybox:Title&gt;&lt;cybox:Object id="alienvault-otx:Address-a16b1be4-2781-4fb8-b860-207e7a1c36be"&gt;&lt;cybox:Properties category="ipv4-addr" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="AddressObj:AddressObjectType"&gt;&lt;AddressObj:Address_Value&gt;193.106.191.162&lt;/AddressObj:Address_Value&gt;&lt;/cybox:Properties&gt;&lt;/cybox:Object&gt;&lt;/indicator:Observable&gt;&lt;/indicator:Indicator&gt;</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.037372242Z</date>
+  <millis>1649403026037</millis>
+  <nanos>372242</nanos>
+  <sequence>3</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because achimumuazi.hopto.org:2311: invalid IPv6 address</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.311755350Z</date>
+  <millis>1649403026311</millis>
+  <nanos>755350</nanos>
+  <sequence>4</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because harvey205.camdvr.org:2404: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.315324959Z</date>
+  <millis>1649403026315</millis>
+  <nanos>324959</nanos>
+  <sequence>5</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because harvey206.casacam.net:2404: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.319266060Z</date>
+  <millis>1649403026319</millis>
+  <nanos>266060</nanos>
+  <sequence>6</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because harvey207.accesscam.org:2404: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.321179251Z</date>
+  <millis>1649403026321</millis>
+  <nanos>179251</nanos>
+  <sequence>7</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because harveyautos110.ddns.net:2404: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.322831209Z</date>
+  <millis>1649403026322</millis>
+  <nanos>831209</nanos>
+  <sequence>8</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because harveyautos111.hopto.org:2404: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.324534859Z</date>
+  <millis>1649403026324</millis>
+  <nanos>534859</nanos>
+  <sequence>9</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because harveyautos112.ddns.net:2404: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.326192163Z</date>
+  <millis>1649403026326</millis>
+  <nanos>192163</nanos>
+  <sequence>10</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because mimi44.ddns.net:2405: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.339665484Z</date>
+  <millis>1649403026339</millis>
+  <nanos>665484</nanos>
+  <sequence>11</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because shiestynerd.dvrlists.com:10174: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:26.341519848Z</date>
+  <millis>1649403026341</millis>
+  <nanos>519848</nanos>
+  <sequence>12</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because xhangzhi.duckdns.org:2404: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:30:27.378092347Z</date>
+  <millis>1649403027378</millis>
+  <nanos>92347</nanos>
+  <sequence>13</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>17</thread>
+  <message>Can't get host addresss because sites.google: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:31:01.310787891Z</date>
+  <millis>1649403061310</millis>
+  <nanos>787891</nanos>
+  <sequence>14</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>13</thread>
+  <message>Can't get host addresss because japanpost.cc: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:31:07.495129108Z</date>
+  <millis>1649403067495</millis>
+  <nanos>129108</nanos>
+  <sequence>15</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>13</thread>
+  <message>Can't get host addresss because irsprofile-relief-tax.com: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:31:09.586219021Z</date>
+  <millis>1649403069586</millis>
+  <nanos>219021</nanos>
+  <sequence>16</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>13</thread>
+  <message>Can't get host addresss because zonasequrawebpichincha.xyz: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:31:14.787637200Z</date>
+  <millis>1649403074787</millis>
+  <nanos>637200</nanos>
+  <sequence>17</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>13</thread>
+  <message>Can't get host addresss because psd2-push.link: Name or service not known</message>
+</record>
+<record>
+  <date>2022-04-08T07:31:15.557622395Z</date>
+  <millis>1649403075557</millis>
+  <nanos>622395</nanos>
+  <sequence>18</sequence>
+  <logger>com.ranjith.threatdetection.service.ThreatFetch</logger>
+  <level>INFO</level>
+  <class>com.ranjith.threatdetection.service.ThreatFetch</class>
+  <method>pollRequest</method>
+  <thread>13</thread>
+  <message>Can't get host addresss because accessoclientiweb.com: Name or service not known</message>
+</record>
+</log>

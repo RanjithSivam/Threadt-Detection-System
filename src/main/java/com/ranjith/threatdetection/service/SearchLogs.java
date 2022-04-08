@@ -9,15 +9,16 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.Scanner;
+import java.util.Optional;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class SearchLogs {
+public class SearchLogs extends Thread{
 	
-	Logger log = LoggerFactory.getLogger(SearchLogs.class);
+	Logger fileLog = Logger.getLogger(ThreatFetch.class.getName());
+	Logger log = Logger.getLogger(SearchLogs.class.getName());
 	
 	private FileSystem fs;
 	private WatchService ws;
@@ -31,7 +32,13 @@ public class SearchLogs {
 		ws = fs.newWatchService();
 		directory = fs.getPath(LOG_PATH).toAbsolutePath();
 		maliciousThreat = MaliciousThreat.getMaliciousThreat();
-		log.info("Monitoring firewall logs....");
+		log.config("Monitoring firewall logs....");
+		try {
+			FileHandler fileHandler = new FileHandler("/home/ranjith/Desktop/threat.log", true);
+			fileLog.addHandler(fileHandler);
+		} catch (SecurityException | IOException e) {
+			log.severe(e.getMessage());
+		}
 	}
 	
 	public void watchForThreats() {
@@ -55,8 +62,10 @@ public class SearchLogs {
 			                	String timeString = currentLog.substring(0,currentLog.indexOf(System.getProperty("user.name")));
 			                	String source = currentLog.substring(currentLog.indexOf("SRC=")+4,currentLog.indexOf("DST")).trim();
 			                	String destination = currentLog.substring(currentLog.indexOf("DST=")+4,currentLog.indexOf("LEN")).trim();
-			                	if(maliciousThreat.isMalicious(source) || maliciousThreat.isMalicious(destination)) {
-			                		log.warn("The followinf connection is malicious. source:{}, destination:{}, time:{}",source,destination,timeString);
+			                	Optional<String> isThreat = maliciousThreat.isMalicious(destination);
+			                	if(isThreat.isPresent()) {
+//			                		log.warning("The following connection is malicious. source: "+source+", destination:"+ destination +", time: "+timeString);
+			                		fileLog.warning("The following connection is malicious. source: "+source+", destination:"+ destination +", time: "+timeString +", info: "+isThreat.get());
 			                	}
 			                	if(first) {
 			                		currentLastReadLine = currentLog;
@@ -71,8 +80,12 @@ public class SearchLogs {
 				}
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			log.severe(e.getMessage());
 		}
 	}
 	
+	@Override
+    public void run() {
+		watchForThreats();
+    }
 }

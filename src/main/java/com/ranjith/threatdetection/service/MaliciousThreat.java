@@ -1,5 +1,7 @@
 package com.ranjith.threatdetection.service;
 
+import java.util.Optional;
+
 import com.ranjith.threatdetection.repository.RocksRepository;
 
 public class MaliciousThreat {
@@ -19,7 +21,7 @@ public class MaliciousThreat {
 		return maliciousThreat;
 	}
 	
-	public boolean isMalicious(String ip) {
-		return rocksRepository.find(ip).isPresent();
+	public Optional<String> isMalicious(String ip) {
+		return rocksRepository.find(ip);
 	}
 }

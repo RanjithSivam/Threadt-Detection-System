@@ -4,20 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ranjith.threatdetection.service.ThreatFetch;
-
 
 
 public class RocksRepository implements RocksRepositoryInterface<String, String> {
 	
-	Logger log = LoggerFactory.getLogger(RocksRepository.class);
+	Logger log = Logger.getLogger(RocksRepository.class.getName());
 	
 	private final static String FILE_NAME = "threat-detection";
 	 private File baseDir;
@@ -35,11 +31,15 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 	        Files.createDirectories(baseDir.getAbsoluteFile().toPath());
 	        db = RocksDB.open(options, baseDir.getAbsolutePath());
 	        
-	        log.info("RocksDB initialized");
+	        log.config("RocksDB initialized");
 	      } catch(IOException | RocksDBException e) {
-	    	  log.error("Error initializng RocksDB. Exception: '{}', message: '{}'", e.getCause(), e.getMessage(), e);
+	    	  log.severe("Error initializng RocksDB. Exception:" + e.getCause() +", message: "+ e.getMessage());
 	      }
 	 
+	}
+	
+	public void close() {
+		db.close();
 	}
 	
 	public static RocksRepository getRocksRepository() {
@@ -55,7 +55,10 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 		try {
 		      db.put(key.getBytes(), value.getBytes());
 		}catch(RocksDBException e) {
-			log.error("Error saving entry. Cause: '{}', message: '{}'", e.getCause(), e.getMessage());
+			log.severe("Error Saving in RocksDB. Exception:" + e.getCause() +", message: "+ e.getMessage());
+			return false;
+		}catch(NullPointerException e) {
+			log.severe("Rocks db is not initialized.");
 			return false;
 		}
 		return true;
@@ -69,13 +72,10 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 		      byte[] bytes = db.get(key.getBytes());
 		      if (bytes != null) value = new String(bytes);
 		    } catch (RocksDBException e) {
-		    	log.error(
-		    	        "Error retrieving the entry with key: {}, cause: {}, message: {}", 
-		    	        key, 
-		    	        e.getCause(), 
-		    	        e.getMessage()
-		    	      );
-		    }
+		    	log.severe("Error retreving key from RocksDB. Exception:" + e.getCause() +", message: "+ e.getMessage());
+		    }catch(NullPointerException e) {
+				log.severe("Rocks db is not initialized.");
+			}
 		return Optional.ofNullable(value);
 	}
 
@@ -84,9 +84,12 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
 		try {
 		      db.delete(key.getBytes());
 		    } catch (RocksDBException e) {
-		    	log.error("Error deleting entry, cause: '{}', message: '{}'", e.getCause(), e.getMessage());
+		    	log.severe("Error deleting from RocksDB. Exception:" + e.getCause() +", message: "+ e.getMessage());
 		      return false;
-		    }
+		    }catch(NullPointerException e) {
+				log.severe("Rocks db is not initialized.");
+				return false;
+			}
 		    return true;
 	}
 }
