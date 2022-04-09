@@ -33,7 +33,7 @@ public class SearchLogs extends Thread{
 		ws = fs.newWatchService();
 		directory = fs.getPath(FIREWALL_LOG_PATH).toAbsolutePath();
 		maliciousThreat = MaliciousThreat.getMaliciousThreat();
-		log.config("Monitoring firewall logs....");
+		log.info("Monitoring firewall logs....");
 		try {
 			FileHandler fileHandler = new FileHandler(THREAT_LOG, true);
 			fileLog.addHandler(fileHandler);
@@ -64,7 +64,6 @@ public class SearchLogs extends Thread{
 			                	String destination = currentLog.substring(currentLog.indexOf("DST=")+4,currentLog.indexOf("LEN")).trim();
 			                	Optional<String> isThreat = maliciousThreat.isMalicious(destination);
 			                	if(isThreat.isPresent()) {
-//			                		log.warning("The following connection is malicious. source: "+source+", destination:"+ destination +", time: "+timeString);
 			                		fileLog.warning("The following connection is malicious. source: "+source+", destination:"+ destination +", time: "+timeString +", info: "+isThreat.get());
 			                	}
 			                	if(first) {

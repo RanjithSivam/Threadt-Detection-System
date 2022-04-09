@@ -61,8 +61,7 @@ public class ThreatFetch extends Thread{
     public ThreatFetch(Source source){
     	this.source = source;
     	initialize();
-    	log.config(Thread.activeCount()+ " thread started....");
-//    	System.out.println(Thread.activeCount()+"staerted...");
+    	log.info(Thread.activeCount()+ " thread started....");
     }
     
     private void initialize() {
@@ -77,8 +76,7 @@ public class ThreatFetch extends Thread{
         try {
 			rocksRepository = RocksRepository.getRocksRepository();
 		} catch (IOException | RocksDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
         
     }
@@ -224,11 +222,7 @@ public class ThreatFetch extends Thread{
     	
     	return false;
     }
-    
-    public void collectionManagement() {
-    	
-    }
-    
+
     @Override
     public void run() {
     	while(true) {

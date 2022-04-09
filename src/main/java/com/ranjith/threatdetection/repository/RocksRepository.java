@@ -29,7 +29,7 @@ public class RocksRepository implements RocksRepositoryInterface<String, String>
         Files.createDirectories(baseDir.getAbsoluteFile().toPath());
         db = RocksDB.open(options, baseDir.getAbsolutePath());
         
-        log.config("RocksDB initialized");
+        log.info("RocksDB initialized");
 	    
     	Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
