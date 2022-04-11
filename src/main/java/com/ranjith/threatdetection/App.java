@@ -67,8 +67,8 @@ public class App
     
     public static void startService() {
     	Sources sources = new Sources();
-    	sources.setList("http://hailataxii.com/taxii-data", "guest","guest");
-//    	sources.setList("https://otx.alienvault.com/taxii/discovery", "441273a7ae6eb344d9fa728071edd89c6b005f1f3ca49e8cf333ec3e40a1648f", "");
+    	sources.setList("https://otx.alienvault.com/taxii/discovery", "441273a7ae6eb344d9fa728071edd89c6b005f1f3ca49e8cf333ec3e40a1648f", "");
+//    	sources.setList("http://hailataxii.com/taxii-data", "guest","guest");
     	
     	try {
     		RocksRepository.getRocksRepository();

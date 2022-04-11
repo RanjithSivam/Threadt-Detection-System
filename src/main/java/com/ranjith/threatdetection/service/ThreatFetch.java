@@ -110,7 +110,7 @@ public class ThreatFetch extends Thread{
     }
     
     public void pollRequest(String collectionName,String source) {
-//    	System.out.println(collectionName+" "+source);
+    	System.out.println(collectionName+" "+source);
     	GregorianCalendar[] date = getBeginEnd();
     	HttpClient taxiiClient = getClient();
     	try {
@@ -197,6 +197,8 @@ public class ThreatFetch extends Thread{
 					}
 				}else if(responseObject instanceof StatusMessage) {
 					log.info("No Poll response was found." + taxiiXml.marshalToString(responseObject, true));
+				}else {
+					System.out.println(taxiiXml.marshalToString(responseObject, false));
 				}
 			}
                     
@@ -243,6 +245,8 @@ public class ThreatFetch extends Thread{
 			}else if(responseObject instanceof StatusMessage) {
 				StatusMessage statusMessage = (StatusMessage) responseObject;
 				log.info(statusMessage.getMessage()+statusMessage.getInResponseTo());
+			}else {
+				System.out.println(taxiiXml.marshalToString(responseObject, false));
 			}
 		} catch (JAXBException | IOException | URISyntaxException e) {
 			e.printStackTrace();
@@ -268,6 +272,8 @@ public class ThreatFetch extends Thread{
 			}else if(responseObject instanceof StatusMessage) {
 				StatusMessage statusMessage = (StatusMessage) responseObject;
 				log.info(statusMessage.getMessage()+statusMessage.getInResponseTo());
+			}else {
+				System.out.println(taxiiXml.marshalToString(responseObject, false));
 			}
 		} catch (JAXBException | IOException | URISyntaxException e) {
 			log.severe(e.getMessage());
