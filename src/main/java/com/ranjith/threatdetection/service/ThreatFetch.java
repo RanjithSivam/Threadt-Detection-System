@@ -2,6 +2,7 @@ package com.ranjith.threatdetection.service;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -9,8 +10,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
@@ -44,6 +47,7 @@ import org.mitre.taxii.messages.xml11.DiscoveryRequest;
 import org.mitre.taxii.messages.xml11.DiscoveryResponse;
 import org.mitre.taxii.messages.xml11.MessageHelper;
 import org.mitre.taxii.messages.xml11.ObjectFactory;
+import org.mitre.taxii.messages.xml11.PollFulfillment;
 import org.mitre.taxii.messages.xml11.PollParametersType;
 import org.mitre.taxii.messages.xml11.PollRequest;
 import org.mitre.taxii.messages.xml11.PollResponse;
@@ -106,7 +110,7 @@ public class ThreatFetch extends Thread{
     }
     
     public void pollRequest(String collectionName,String source) {
-    	System.out.println(collectionName+" "+source);
+//    	System.out.println(collectionName+" "+source);
     	GregorianCalendar[] date = getBeginEnd();
     	HttpClient taxiiClient = getClient();
     	try {
@@ -117,65 +121,83 @@ public class ThreatFetch extends Thread{
 			PollParametersType pollParameter = new PollParametersType();
 			pollParameter.setResponseType(ResponseTypeEnum.FULL);
 			pollRequest.setPollParameters(pollParameter);
+			
+			List<Object> multiPartResponse = new ArrayList<Object>();
+			
 			Object responseObject = taxiiClient.callTaxiiService(new URI(source), pollRequest);
+			multiPartResponse.add(responseObject);
 //			System.out.println(taxiiXml.marshalToString(responseObject,false));
-			if(responseObject instanceof PollResponse) {
-				
-//				log.info(taxiiXml.marshalToString(responseObject,false));
-				
-				for(ContentBlock contentBlock : ((PollResponse) responseObject).getContentBlocks()) {
-					
-					String contentBlockString = taxiiXml.marshalToString(contentBlock,false);
-					
-					STIXPackage stixPackage = STIXPackage.fromXMLString(contentBlockString.substring(contentBlockString.indexOf("<stix:STIX_Package"), contentBlockString.lastIndexOf("</stix:STIX_Package>"))+"</stix:STIX_Package>");
-					
-					if(stixPackage.getObservables()!=null) {
-						
-						if(stixPackage.getObservables().getObservables()!=null) {
-							
-							for(Observable observable : stixPackage.getObservables().getObservables()) {
-								
-//								System.out.println(observable.toXMLString());
-								
-								if(observable!=null){
-									
-									if(observable.getObject()!=null) {
-										
-										 ObjectPropertiesType objectPropertiesType = observable.getObject().getProperties();
-										parser(objectPropertiesType,observable.toXMLString());
-										
-									}
-								}
-							}
-						}
-					}
-					
-					if(stixPackage.getIndicators()!=null) {
-						
-						if(stixPackage.getIndicators().getIndicators()!=null) {
-							
-							for(IndicatorBaseType indicatorBaseType: stixPackage.getIndicators().getIndicators()) {
-								
-								Indicator indicator = (Indicator) indicatorBaseType;
-								
-//								System.out.println(indicator.toXMLString());
-								
-								if(indicator.getObservable()!=null) {
-									
-//									System.out.println(indicator.getObservable().toXMLString());
-									
-									if(indicator.getObservable().getObject()!=null) {
-										ObjectPropertiesType objectPropertiesType = indicator.getObservable().getObject().getProperties();
-										parser(objectPropertiesType,indicator.toXMLString());
-										
-									}
-								}
-							}
-						}
-					}
+			while(((PollResponse) responseObject).isMore()) {
+				PollResponse pollResponse = (PollResponse) responseObject;
+				PollFulfillment pollFulfillment = factory.createPollFulfillment().withCollectionName(pollResponse.getCollectionName()).withResultId(pollResponse.getResultId()).withResultPartNumber(pollResponse.getResultPartNumber().add(new BigInteger("1")));
+				responseObject = taxiiClient.callTaxiiService(new URI(source), pollFulfillment);
+				if(responseObject instanceof PollResponse) {
+					multiPartResponse.add(responseObject);
+				}else {
+					break;
 				}
-			}else if(responseObject instanceof StatusMessage) {
-				log.info("No Poll response was found." + taxiiXml.marshalToString(responseObject, true));
+			}
+//			System.out.println(multiPartResponse);
+			for(Object respoObject: multiPartResponse) {
+				if(responseObject instanceof PollResponse) {
+					
+					
+//					log.info(taxiiXml.marshalToString(responseObject,false));
+					
+					for(ContentBlock contentBlock : ((PollResponse) responseObject).getContentBlocks()) {
+						
+						String contentBlockString = taxiiXml.marshalToString(contentBlock,false);
+						
+						STIXPackage stixPackage = STIXPackage.fromXMLString(contentBlockString.substring(contentBlockString.indexOf("<stix:STIX_Package"), contentBlockString.lastIndexOf("</stix:STIX_Package>"))+"</stix:STIX_Package>");
+						
+						if(stixPackage.getObservables()!=null) {
+							
+							if(stixPackage.getObservables().getObservables()!=null) {
+								
+								for(Observable observable : stixPackage.getObservables().getObservables()) {
+									
+//									System.out.println(observable.toXMLString());
+									
+									if(observable!=null){
+										
+										if(observable.getObject()!=null) {
+											
+											 ObjectPropertiesType objectPropertiesType = observable.getObject().getProperties();
+											parser(objectPropertiesType,observable.toXMLString());
+											
+										}
+									}
+								}
+							}
+						}
+						
+						if(stixPackage.getIndicators()!=null) {
+							
+							if(stixPackage.getIndicators().getIndicators()!=null) {
+								
+								for(IndicatorBaseType indicatorBaseType: stixPackage.getIndicators().getIndicators()) {
+									
+									Indicator indicator = (Indicator) indicatorBaseType;
+									
+//									System.out.println(indicator.toXMLString());
+									
+									if(indicator.getObservable()!=null) {
+										
+//										System.out.println(indicator.getObservable().toXMLString());
+										
+										if(indicator.getObservable().getObject()!=null) {
+											ObjectPropertiesType objectPropertiesType = indicator.getObservable().getObject().getProperties();
+											parser(objectPropertiesType,indicator.toXMLString());
+											
+										}
+									}
+								}
+							}
+						}
+					}
+				}else if(responseObject instanceof StatusMessage) {
+					log.info("No Poll response was found." + taxiiXml.marshalToString(responseObject, true));
+				}
 			}
                     
 		} catch (DatatypeConfigurationException e) {
@@ -202,7 +224,20 @@ public class ThreatFetch extends Thread{
 				CollectionInformationResponse collectionInformationResponse = (CollectionInformationResponse) responseObject;
 				for(CollectionRecordType collectionRecordType : collectionInformationResponse.getCollections()) {
 					if(collectionRecordType.isAvailable()) {
-						pollRequest(collectionRecordType.getCollectionName(),collectionRecordType.getPollingServices().get(0).getAddress());
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								while(true) {
+									pollRequest(collectionRecordType.getCollectionName(),collectionRecordType.getPollingServices().get(0).getAddress());
+						    		try {
+										Thread.sleep(DefaultConstants.getFETCHING_TIMING());
+									} catch (InterruptedException e) {
+										log.severe(e.getMessage());
+									}
+						    	}
+	
+							}
+						}).start();
 					}
 				}
 			}else if(responseObject instanceof StatusMessage) {
@@ -242,14 +277,7 @@ public class ThreatFetch extends Thread{
 
     @Override
     public void run() {
-    	while(true) {
-    		discover();
-    		try {
-				Thread.sleep(DefaultConstants.getFETCHING_TIMING());
-			} catch (InterruptedException e) {
-				log.severe(e.getMessage());
-			}
-    	}
+    	discover();
     }
     
     
@@ -281,6 +309,7 @@ public class ThreatFetch extends Thread{
 //		System.out.println(Thread.currentThread().getName()+" "+ threatUrl);
 		try {
 			String threatIp = InetAddress.getByName(new URL(threatUrl).getHost()).getHostAddress();
+//			System.out.println(threatIp);
 			rocksRepository.save(threatIp, message);
 		}catch(UnknownHostException | MalformedURLException e) {
 			log.info("Can't get host addresss because "+e.getMessage());
@@ -291,6 +320,7 @@ public class ThreatFetch extends Thread{
 //		System.out.println(Thread.currentThread().getName()+" "+ threatIp);
     	try {
 			String threatIp = InetAddress.getByAddress(address.getAddressValue().getValue().toString().getBytes()).getHostAddress();
+//			System.out.println(threatIp);
 			if(InetAddress.getByAddress(address.getAddressValue().getValue().toString().getBytes()) instanceof Inet4Address) {
 				for(String ip:new SubnetUtils(threatIp).getInfo().getAllAddresses()) {
 					rocksRepository.save(ip, message);
@@ -307,6 +337,7 @@ public class ThreatFetch extends Thread{
     private void parseHostname(Hostname hostname,String message) {
     	try {
 			String threatIp = InetAddress.getByName(hostname.getHostnameValue().getValue().toString()).getHostAddress();
+//			System.out.println(threatIp);
 			rocksRepository.save(threatIp, message);
 		} catch (UnknownHostException e) {
 			log.info("Can't get host addresss because "+e.getMessage());
@@ -320,9 +351,10 @@ public class ThreatFetch extends Thread{
     private void parseDomainName(DomainName domainName, String message) {
 		try {
 			String threatIp = InetAddress.getByName(domainName.getValue().getValue().toString()).getHostAddress();
+//			System.out.println(threatIp);
 			rocksRepository.save(threatIp, message);
 		}catch(UnknownHostException e) {
-//			log.info("Can't get host addresss because "+e.getMessage());
+			log.info("Can't get host addresss because "+e.getMessage());
 		}
 	}
 
