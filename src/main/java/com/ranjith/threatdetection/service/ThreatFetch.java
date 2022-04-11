@@ -35,6 +35,9 @@ import org.mitre.stix.common_1.IndicatorBaseType;
 import org.mitre.stix.indicator_2.Indicator;
 import org.mitre.stix.stix_1.STIXPackage;
 import org.mitre.taxii.client.HttpClient;
+import org.mitre.taxii.messages.xml11.CollectionInformationRequest;
+import org.mitre.taxii.messages.xml11.CollectionInformationResponse;
+import org.mitre.taxii.messages.xml11.CollectionRecordType;
 import org.mitre.taxii.messages.xml11.ContentBlock;
 import org.mitre.taxii.messages.xml11.DiscoveryRequest;
 import org.mitre.taxii.messages.xml11.DiscoveryResponse;
@@ -44,11 +47,14 @@ import org.mitre.taxii.messages.xml11.PollParametersType;
 import org.mitre.taxii.messages.xml11.PollRequest;
 import org.mitre.taxii.messages.xml11.PollResponse;
 import org.mitre.taxii.messages.xml11.ResponseTypeEnum;
+import org.mitre.taxii.messages.xml11.ServiceInstanceType;
+import org.mitre.taxii.messages.xml11.ServiceTypeEnum;
 import org.mitre.taxii.messages.xml11.StatusMessage;
 import org.mitre.taxii.messages.xml11.TaxiiXml;
 import org.mitre.taxii.messages.xml11.TaxiiXmlFactory;
 import org.rocksdb.RocksDBException;
 
+import com.ranjith.threatdetection.DefaultConstants;
 import com.ranjith.threatdetection.model.Source;
 import com.ranjith.threatdetection.repository.RocksRepository;
 
@@ -59,10 +65,8 @@ public class ThreatFetch extends Thread{
 	private ObjectFactory factory = new ObjectFactory();
 	private TaxiiXmlFactory txf = new TaxiiXmlFactory();
     private TaxiiXml taxiiXml = txf.createTaxiiXml();
-    private HttpClient taxiiClient;
     private Source source;
     private RocksRepository rocksRepository;
-    private final int ONE_DAY = 86400000;
 
     
     public ThreatFetch(Source source){
@@ -72,6 +76,14 @@ public class ThreatFetch extends Thread{
     }
     
     private void initialize() {
+        try {
+			rocksRepository = RocksRepository.getRocksRepository();
+		} catch (IOException | RocksDBException e) {
+			System.out.println(e.getMessage());
+		}
+    }
+    
+    private HttpClient getClient() {
     	HttpClientBuilder cb = HttpClientBuilder.create();
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
@@ -79,36 +91,33 @@ public class ThreatFetch extends Thread{
                 new UsernamePasswordCredentials(source.getUsername(), source.getPassword()));        
         cb.setDefaultCredentialsProvider(credsProvider);        
         CloseableHttpClient httpClient = cb.build();
-        taxiiClient = new HttpClient(httpClient);
-        try {
-			rocksRepository = RocksRepository.getRocksRepository();
-		} catch (IOException | RocksDBException e) {
-			System.out.println(e.getMessage());
-		}
-        
+        HttpClient taxiiClient = new HttpClient(httpClient);
+        return taxiiClient;
     }
     
     private GregorianCalendar[] getBeginEnd() {
     	GregorianCalendar begin = new GregorianCalendar();
-    	begin.setTime(new Date(new Date().getTime()- ONE_DAY));
+    	begin.setTime(new Date(new Date().getTime()- DefaultConstants.getFETCHING_TIMING()));
         GregorianCalendar end = new GregorianCalendar();
         end.setTime(new Date());
         
         return new GregorianCalendar[] { begin, end };
     }
     
-    public void pollRequest() {
+    public void pollRequest(String collectionName,String source) {
+    	System.out.println(collectionName+" "+source);
     	GregorianCalendar[] date = getBeginEnd();
+    	HttpClient taxiiClient = getClient();
     	try {
 			PollRequest pollRequest = factory.createPollRequest().withMessageId(MessageHelper.generateMessageId())
-					.withCollectionName(source.getFeed())
+					.withCollectionName(collectionName)
 					.withExclusiveBeginTimestamp(DatatypeFactory.newInstance().newXMLGregorianCalendar(date[0]))
 					.withInclusiveEndTimestamp(DatatypeFactory.newInstance().newXMLGregorianCalendar(date[1]));
 			PollParametersType pollParameter = new PollParametersType();
 			pollParameter.setResponseType(ResponseTypeEnum.FULL);
 			pollRequest.setPollParameters(pollParameter);
-			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()+"/poll"), pollRequest);
-			System.out.println(taxiiXml.marshalToString(responseObject,false));
+			Object responseObject = taxiiClient.callTaxiiService(new URI(source), pollRequest);
+//			System.out.println(taxiiXml.marshalToString(responseObject,false));
 			if(responseObject instanceof PollResponse) {
 				
 //				log.info(taxiiXml.marshalToString(responseObject,false));
@@ -181,37 +190,61 @@ public class ThreatFetch extends Thread{
 		}
     }
     
+    private void collectionManagement(String source) {
+    	HttpClient taxiiClient = getClient();
+    	CollectionInformationRequest CollectionInformationRequest = factory.createCollectionInformationRequest().withMessageId(MessageHelper.generateMessageId());
+    	Object responseObject;
+		try {
+			responseObject = taxiiClient.callTaxiiService(new URI(source), CollectionInformationRequest);
+//			System.out.println(taxiiXml.marshalToString(responseObject, false));
+			if(responseObject instanceof CollectionInformationResponse) {
+				CollectionInformationResponse collectionInformationResponse = (CollectionInformationResponse) responseObject;
+				for(CollectionRecordType collectionRecordType : collectionInformationResponse.getCollections()) {
+					if(collectionRecordType.isAvailable()) {
+						pollRequest(collectionRecordType.getCollectionName(),collectionRecordType.getPollingServices().get(0).getAddress());
+					}
+				}
+			}else if(responseObject instanceof StatusMessage) {
+				StatusMessage statusMessage = (StatusMessage) responseObject;
+				log.info(statusMessage.getMessage()+statusMessage.getInResponseTo());
+			}
+		} catch (JAXBException | IOException | URISyntaxException e) {
+			e.printStackTrace();
+		}
+    	
+    }
+    
 
-	public boolean discover() {
+	public void discover() {
+		HttpClient taxiiClient = getClient();
     	DiscoveryRequest dicoveryRequest = factory.createDiscoveryRequest().withMessageId(MessageHelper.generateMessageId());
     	try {
-			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getUrl()), dicoveryRequest);
-			
+			Object responseObject = taxiiClient.callTaxiiService(new URI(source.getDicoverUrl()), dicoveryRequest);
+//			System.out.println(taxiiXml.marshalToString(responseObject, false));
 			if(responseObject instanceof DiscoveryResponse) {
 				DiscoveryResponse dr = (DiscoveryResponse) responseObject;
-//				System.out.println(taxiiXml.marshalToString(dr, true));
+				for(ServiceInstanceType serviceInstanceType: dr.getServiceInstances()) {
+//					System.out.println(serviceInstanceType.getAddress());
+					if(serviceInstanceType.isAvailable() && serviceInstanceType.getServiceType().equals(ServiceTypeEnum.COLLECTION_MANAGEMENT)) {
+						collectionManagement(serviceInstanceType.getAddress());
+					}
+				}
+			}else if(responseObject instanceof StatusMessage) {
+				StatusMessage statusMessage = (StatusMessage) responseObject;
+				log.info(statusMessage.getMessage()+statusMessage.getInResponseTo());
 			}
 		} catch (JAXBException | IOException | URISyntaxException e) {
 			log.severe(e.getMessage());
-			return false;
+		
 		}
-    	
-    	return true;
     }
 
     @Override
     public void run() {
     	while(true) {
-//    		if(discover()) {
-//    			pollRequest();
-//    		}else {
-//    			break;
-//    		}
-//    		
-    		pollRequest();
-    		
+    		discover();
     		try {
-				Thread.sleep(ONE_DAY);
+				Thread.sleep(DefaultConstants.getFETCHING_TIMING());
 			} catch (InterruptedException e) {
 				log.severe(e.getMessage());
 			}

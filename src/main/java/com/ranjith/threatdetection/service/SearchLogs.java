@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 
+import com.ranjith.threatdetection.DefaultConstants;
+
 public class SearchLogs extends Thread{
 	
 	Logger fileLog = Logger.getLogger(SearchLogs.class.getName());
@@ -23,8 +25,8 @@ public class SearchLogs extends Thread{
 	private FileSystem fs;
 	private WatchService ws;
 	private Path directory;
-	private final String FIREWALL_LOG_PATH = "/var/log";
-	private final String THREAT_LOG = "/home/ranjith/Desktop/threat.log";
+	private final String FIREWALL_LOG_PATH = DefaultConstants.getFIREWALL_LOG();
+	private final String THREAT_LOG = DefaultConstants.getTHREAT_LOG();
 	private MaliciousThreat maliciousThreat;
 	private String lastReadLine;
 	
@@ -35,7 +37,7 @@ public class SearchLogs extends Thread{
 		maliciousThreat = MaliciousThreat.getMaliciousThreat();
 		log.info("Monitoring firewall logs....");
 		try {
-			FileHandler fileHandler = new FileHandler(THREAT_LOG, true);
+			FileHandler fileHandler = new FileHandler(THREAT_LOG+"/threat.log", true);
 			fileLog.addHandler(fileHandler);
 		} catch (SecurityException | IOException e) {
 			log.severe(e.getMessage());
@@ -49,7 +51,7 @@ public class SearchLogs extends Thread{
 			while(true) {
 				for(WatchEvent<?> event : watchKey.pollEvents()) {
 		            final Path changed = (Path) event.context();
-		            if (changed.endsWith("ufw.log")) {
+		            if (changed.endsWith(DefaultConstants.getTHREAT_LOG_NAME())) {
 		                try(ReversedLinesFileReader fileReader = new ReversedLinesFileReader(new File(FIREWALL_LOG_PATH+"/ufw.log"))) {
 			                String currentLog;
 			                String currentLastReadLine = null;

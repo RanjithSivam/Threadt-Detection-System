@@ -15,8 +15,8 @@ public class Sources {
 		list = new ArrayList();
 	}
 
-	public void setList(String url,String username,String password,String feed) {
-		Source source = new Source(url,username,password,feed);
+	public void setList(String url,String username,String password) {
+		Source source = new Source(url,username,password);
 		list.add(source);
 	}
 }

@@ -1,24 +1,22 @@
 package com.ranjith.threatdetection.model;
 
 public class Source {
-	private String url;
+	private String dicoverUrl;
 	private String username;
 	private String password;
-	private String feed;
 	
-	public Source(String url, String username, String password,String feed) {
+	public Source(String dicoverUrl, String username, String password) {
 		super();
-		this.url = url;
+		this.dicoverUrl = dicoverUrl;
 		this.username = username;
 		this.password = password;
-		this.feed = feed;
 	}
 	
-	public String getUrl() {
-		return url;
+	public String getDicoverUrl() {
+		return dicoverUrl;
 	}
-	public void setUrl(String url) {
-		this.url = url;
+	public void setDicoverUrl(String dicoverUrl) {
+		this.dicoverUrl = dicoverUrl;
 	}
 	public String getUsername() {
 		return username;
@@ -31,14 +29,6 @@ public class Source {
 	}
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public String getFeed() {
-		return feed;
-	}
-
-	public void setFeed(String feed) {
-		this.feed = feed;
 	}
 	
 }
