@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
+import org.apache.commons.net.util.SubnetUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -278,7 +279,6 @@ public class ThreatFetch extends Thread{
 	private void parseURIObjectType(URIObjectType type,String message) {
     	String threatUrl = type.getValue().getValue().toString().trim();
 //		System.out.println(Thread.currentThread().getName()+" "+ threatUrl);
-		
 		try {
 			String threatIp = InetAddress.getByName(new URL(threatUrl).getHost()).getHostAddress();
 			rocksRepository.save(threatIp, message);
@@ -290,11 +290,16 @@ public class ThreatFetch extends Thread{
     private void parseAddress(Address address,String message) {
 //		System.out.println(Thread.currentThread().getName()+" "+ threatIp);
     	try {
-			String threatIp = Inet4Address.getByAddress(address.getAddressValue().getValue().toString().getBytes()).getHostAddress();
-			rocksRepository.save(threatIp, message);
+			String threatIp = InetAddress.getByAddress(address.getAddressValue().getValue().toString().getBytes()).getHostAddress();
+			if(InetAddress.getByAddress(address.getAddressValue().getValue().toString().getBytes()) instanceof Inet4Address) {
+				for(String ip:new SubnetUtils(threatIp).getInfo().getAllAddresses()) {
+					rocksRepository.save(ip, message);
+				}
+			}else {
+				rocksRepository.save(threatIp, message);
+			}
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.info("Can't get host addresss because "+e.getMessage());
 		}
     	
     }

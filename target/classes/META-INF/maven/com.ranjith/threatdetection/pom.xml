@@ -85,10 +85,11 @@
 	
 	<!-- IP addresss to hostname -->
 	<dependency>
-		<groupId>com.google.guava</groupId>
-		<artifactId>guava</artifactId>
-		<version>21.0</version>
+	    <groupId>commons-net</groupId>
+	    <artifactId>commons-net</artifactId>
+	    <version>3.6</version>
 	</dependency>
+	
 	
 	<!-- Reverse read file -->
 	<dependency>
