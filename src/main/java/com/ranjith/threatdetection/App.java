@@ -16,13 +16,14 @@ import com.ranjith.threatdetection.service.ThreatFetch;
 
 public class App
 {
+	private static Sources sources = new Sources();
     public static void main( String[] args )
     {
     	System.out.println("Welcome to Threat Detection Application");
     	
     	try(Scanner sc = new Scanner(System.in)){
     		while(true) {
-        		System.out.println("Options available\n 1.Change fetching period\n 2.Change firewall log file monitoring\n 3.Change log file location\n 4.Change firewall log file to monitor\n 5.Start the application\n");
+        		System.out.println("Options available\n 1.Change fetching period\n 2.Change firewall log file monitoring\n 3.Change log file location\n 4.Change firewall log file to monitor\n 5.Add taxii servers\n 6.Start the application\n");
         		int option = sc.nextInt();
         		switch(option) {
         		case 1:
@@ -56,6 +57,15 @@ public class App
         			DefaultConstants.setTHREAT_LOG_NAME(name);
         			break;
         		case 5:
+        			System.out.println("Enter taxii server url: ");
+        			String url = sc.next();
+        			System.out.println("Enter username and password for authentication: ");
+        			String username = sc.next();
+        			String password = sc.next();
+        			sources.setList(url, username, password);
+        			System.out.println("Sources added successfully!.");
+        			break;
+        		case 6:
         			startService();
         			return;
         		default:
@@ -66,7 +76,6 @@ public class App
     }
     
     public static void startService() {
-    	Sources sources = new Sources();
     	sources.setList("https://otx.alienvault.com/taxii/discovery", "441273a7ae6eb344d9fa728071edd89c6b005f1f3ca49e8cf333ec3e40a1648f", "");
 //    	sources.setList("http://hailataxii.com/taxii-data", "guest","guest");
     	
