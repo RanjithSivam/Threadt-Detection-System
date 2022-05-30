@@ -61,6 +61,8 @@ import org.rocksdb.RocksDBException;
 
 import com.ranjith.threatdetection.DefaultConstants;
 import com.ranjith.threatdetection.model.Source;
+import com.ranjith.threatdetection.repository.MapDBRepository;
+import com.ranjith.threatdetection.repository.RepositoryInterface;
 import com.ranjith.threatdetection.repository.RocksRepository;
 
 public class ThreatFetch extends Thread{
@@ -71,7 +73,7 @@ public class ThreatFetch extends Thread{
 	private TaxiiXmlFactory txf = new TaxiiXmlFactory();
     private TaxiiXml taxiiXml = txf.createTaxiiXml();
     private Source source;
-    private RocksRepository rocksRepository;
+    private RepositoryInterface<String, String> repository;
 
     
     public ThreatFetch(Source source){
@@ -81,11 +83,8 @@ public class ThreatFetch extends Thread{
     }
     
     private void initialize() {
-        try {
-			rocksRepository = RocksRepository.getRocksRepository();
-		} catch (IOException | RocksDBException e) {
-			System.out.println(e.getMessage());
-		}
+        //			repository = RocksRepository.getRocksRepository();
+		repository = MapDBRepository.getMapDBRepository();
     }
     
     private HttpClient getClient() {
@@ -316,7 +315,7 @@ public class ThreatFetch extends Thread{
 		try {
 			String threatIp = InetAddress.getByName(new URL(threatUrl).getHost()).getHostAddress();
 //			System.out.println(threatIp);
-			rocksRepository.save(threatIp, message);
+			repository.save(threatIp, message);
 		}catch(UnknownHostException | MalformedURLException e) {
 			log.info("Can't get host addresss because "+e.getMessage());
 		}
@@ -329,10 +328,10 @@ public class ThreatFetch extends Thread{
 //			System.out.println(threatIp);
 			if(InetAddress.getByAddress(address.getAddressValue().getValue().toString().getBytes()) instanceof Inet4Address) {
 				for(String ip:new SubnetUtils(threatIp).getInfo().getAllAddresses()) {
-					rocksRepository.save(ip, message);
+					repository.save(ip, message);
 				}
 			}else {
-				rocksRepository.save(threatIp, message);
+				repository.save(threatIp, message);
 			}
 		} catch (UnknownHostException e) {
 			log.info("Can't get host addresss because "+e.getMessage());
@@ -344,7 +343,7 @@ public class ThreatFetch extends Thread{
     	try {
 			String threatIp = InetAddress.getByName(hostname.getHostnameValue().getValue().toString()).getHostAddress();
 //			System.out.println(threatIp);
-			rocksRepository.save(threatIp, message);
+			repository.save(threatIp, message);
 		} catch (UnknownHostException e) {
 			log.info("Can't get host addresss because "+e.getMessage());
 		}
@@ -358,7 +357,7 @@ public class ThreatFetch extends Thread{
 		try {
 			String threatIp = InetAddress.getByName(domainName.getValue().getValue().toString()).getHostAddress();
 //			System.out.println(threatIp);
-			rocksRepository.save(threatIp, message);
+			repository.save(threatIp, message);
 		}catch(UnknownHostException e) {
 			log.info("Can't get host addresss because "+e.getMessage());
 		}

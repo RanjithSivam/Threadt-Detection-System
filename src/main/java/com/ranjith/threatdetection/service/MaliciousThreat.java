@@ -1,24 +1,18 @@
 package com.ranjith.threatdetection.service;
 
-import java.io.IOException;
 import java.util.Optional;
 
-import org.rocksdb.RocksDBException;
-
-import com.ranjith.threatdetection.repository.RocksRepository;
+import com.ranjith.threatdetection.repository.MapDBRepository;
+import com.ranjith.threatdetection.repository.RepositoryInterface;
 
 public class MaliciousThreat {
 	
-	private RocksRepository rocksRepository;
+	private RepositoryInterface<String, String> repository;
 	public static MaliciousThreat maliciousThreat;
 	
 	private MaliciousThreat(){
-		try {
-			rocksRepository = RocksRepository.getRocksRepository();
-		} catch (IOException | RocksDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//			repository = RocksRepository.getRocksRepository();
+		repository = MapDBRepository.getMapDBRepository();
 	}
 	
 	public static MaliciousThreat getMaliciousThreat() {
@@ -30,6 +24,6 @@ public class MaliciousThreat {
 	}
 	
 	public Optional<String> isMalicious(String ip) {
-		return rocksRepository.find(ip);
+		return repository.find(ip);
 	}
 }
