@@ -11,7 +11,7 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
 
-public class RocksRepository implements RocksRepositoryInterface<String, String> {
+public class RocksRepository implements RepositoryInterface<String, String> {
 	
 	Logger log = Logger.getLogger(RocksRepository.class.getName());
 	
