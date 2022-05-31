@@ -3,7 +3,7 @@ package com.ranjith.threatdetection;
 public class DefaultConstants {
 	private static String FIREWALL_LOG = "/var/log";
 	private static String THREAT_LOG = "/home/ranjith/Desktop";
-	private static long FETCHING_TIMING = 3600000;
+	private static long FETCHING_TIMING = 3600000*24;
 	private static String THREAT_LOG_NAME = "ufw.log";
 	
 	public static String getFIREWALL_LOG() {

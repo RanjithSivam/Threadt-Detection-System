@@ -10,6 +10,8 @@ import org.rocksdb.RocksDBException;
 
 import com.ranjith.threatdetection.model.Source;
 import com.ranjith.threatdetection.model.Sources;
+import com.ranjith.threatdetection.repository.MapDBRepository;
+import com.ranjith.threatdetection.repository.RepositoryInterface;
 import com.ranjith.threatdetection.repository.RocksRepository;
 import com.ranjith.threatdetection.service.ThreatFetch;
 
@@ -68,6 +70,9 @@ public class App
         		case 6:
         			startService();
         			return;
+        		case 7:
+        			RepositoryInterface<String, String> repositoryInterface = MapDBRepository.getMapDBRepository();
+        			repositoryInterface.print();
         		default:
         			continue;
         		}
@@ -76,21 +81,14 @@ public class App
     }
     
     public static void startService() {
-    	sources.setList("https://otx.alienvault.com/taxii/discovery", "441273a7ae6eb344d9fa728071edd89c6b005f1f3ca49e8cf333ec3e40a1648f", "");
-//    	sources.setList("http://hailataxii.com/taxii-data", "guest","guest");
+//    	sources.setList("https://otx.alienvault.com/taxii/discovery", "441273a7ae6eb344d9fa728071edd89c6b005f1f3ca49e8cf333ec3e40a1648f", "");
+    	sources.setList("http://hailataxii.com/taxii-data", "guest","guest");
     	
-    	try {
-    		RocksRepository.getRocksRepository();
-    		for(Source source:sources.getList()) {
-        		ThreatFetch fetch = new ThreatFetch(source);
-        		fetch.start();
-        	}
-        	
-//        	SearchLogs searchLogs = new SearchLogs();
-//        	searchLogs.start();
-    	}catch(IOException | RocksDBException e) {
-	    	  System.out.println("Error initializng RocksDB. Exception:" + e.getCause() +", message: "+ e.getMessage());
-	      }
+    	//    		RocksRepository.getRocksRepository();
+		for(Source source:sources.getList()) {
+			ThreatFetch fetch = new ThreatFetch(source);
+			fetch.start();
+		}
     
     }
 }

@@ -90,4 +90,9 @@ public class RocksRepository implements RepositoryInterface<String, String> {
 			}
 		    return true;
 	}
+	
+	@Override
+	public void print() {
+		
+	}
 }
